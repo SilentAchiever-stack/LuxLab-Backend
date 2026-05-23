@@ -1,4 +1,4 @@
-const Appointment = require('../models/userImage');
+const Appointment = require('../Models/userImage');
 const cloudinary = require('cloudinary').v2; // Handles removing the asset from Cloudinary storage
 
 // Create a new home appointment with an optional custom hair style image
