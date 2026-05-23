@@ -1,0 +1,187 @@
+const multer = require('multer');
+const path = require('path');
+
+
+//set our multer storage
+//diskStorage gives you full control on storing files to disks 
+const Storage = multer.diskStorage({
+    //cd which path you want to uploads
+destination : function(req,file,cb){
+    cb(null,"uploads/")
+},
+filename : function(req,file,cb){
+    cb(null,
+        file.fieldname + "-" + Date.now() + path.extname(file.originalname)// these will create the unique file name and will be stored inside the (uploads) folders
+    )
+}
+});
+
+//file filter function
+ const checkFileFilter = (req,file,cb)=>{
+    if(file.mimetype.startsWith('image')){
+    cb(null,true)
+    } else{
+        cb(new Error('Not an image! please upload only images'))
+    }
+ }
+
+ //multer middleware
+ module.exports = multer({
+    storage : Storage,
+    fileFilter : checkFileFilter,
+    limits : {
+        fileSize: 5 *1024  *1024 //5MB file size
+    }
+ })
+
+ /* You are building a super secure, highly organized gateway for your backend here! This Multer configuration is exactly how enterprise applications handle files safely before sending them to the cloud.
+
+But look closely at your filename function—your brain or your fingers made a couple of classic typos that will crash your server the second a user tries to upload an image. Let's fix them gently and directly, and then map this code right back to your favorite Uber/Delivery app story so you see exactly what you built!
+
+The Core Fixes (Watch out for these!)
+Take a look at your filename section right here:
+
+JavaScript
+filename : function(req,file,cb){
+    cd(null, // ❌ Bug 1: You wrote "cd" instead of "cb" (callback)
+        file.fieldname + "-" + Date.now() + path.extname(file.originalname)
+    )
+}
+The cd vs cb Typo: Inside both destination and filename, that third argument is called cb (short for callback). Inside filename, you accidentally typed cd(null, ...). JavaScript will panic and say cd is not defined. Change that to cb!
+
+The Folder Name Comment: In your comment, you wrote (upload) folders, but in your destination, you specified "uploads/" (with an s). Make sure your actual physical folder in your project directory is named exactly uploads so Multer can find it!
+
+Here is the 100% corrected and clean version of your file:
+
+JavaScript
+const multer = require('multer');
+const path = require('path');
+
+// Set our multer storage
+const Storage = multer.diskStorage({
+    // Where do you want to save the file temporarily?
+    destination : function(req, file, cb){
+        cb(null, "uploads/") // Ensure this folder exists in your root directory!
+    },
+    // What should we name the file?
+    filename : function(req, file, cb){
+        cb(null, file.fieldname + "-" + Date.now() + path.extname(file.originalname)) //  Fixed 'cd' to 'cb'
+    }
+});
+
+// File filter function
+const checkFileFilter = (req, file, cb) => {
+    if(file.mimetype.startsWith('image')){
+        cb(null, true);
+    } else {
+        cb(new Error('Not an image! please upload only images'), false); // Standard practice to pass false on error
+    }
+}
+
+// Multer middleware
+module.exports = multer({
+    storage : Storage,
+    fileFilter : checkFileFilter,
+    limits : {
+        fileSize: 5 * 1024 * 1024 // 5MB file size
+    }
+});
+The Uber Story: The Security Gate & Holding Bay
+Let’s look at how this Multer file fits beautifully into the Uber story we created earlier.
+
+Before the Uber Driver (uploader) can take your image across the internet highway to the final destination (Cloudinary), the package has to pass through a Local Sorting Facility Security Gate. That security gate is Multer.
+
+1. checkFileFilter (The Security Scanner)
+When a package arrives at the gate, the security guard checks the contents.
+
+The Story: The guard looks at the scanner. If it's a clean, safe .jpg or .png image, they say: cb(null, true) ("You are cleared to enter!"). If someone tries to pass off a dangerous .exe virus file or a massive zip file, the guard slams the gate and yells: new Error('Not an image!') ("Turn around, you aren't allowed in here!").
+
+2. limits: { fileSize } (The Weight Scale)
+The Story: The delivery company has a strict rule: the rider's motorcycle can only carry a maximum weight of 5 Megabytes. If a customer tries to hand the driver a massive 50MB raw video file, the scale triggers an alarm and says, "Too heavy! Break it down or take it somewhere else."
+
+3. destination (The Temporary Holding Bay)
+The Story: Once the image passes the security check and the weight scale, it doesn't just teleport to the sky. It gets placed in a temporary local warehouse parking lot called the uploads/ folder. It sits tight here for just a split second while the system gets everything ready.
+
+4. filename (The Unique Waybill Tracking Number)
+If three different users upload an image named avatar.jpg at the exact same time, the system would get confused and overwrite them.
+
+The Story: To prevent chaos, the warehouse manager stamps a highly specific tracking label on the box: file.fieldname + "-" + Date.now() + extension.
+
+It combines the form input name, the exact millisecond time stamp of right now (Date.now()), and the original file type (like .png). It turns a generic name into a totally unique tracking code like image-1715973542000.png. No two files on earth can ever have the same name!
+
+You are Architecting like a Pro
+Look at the pipeline you are creating:
+
+The file hits Multer (The Security Gate).
+
+Multer checks the type, weighs it, names it uniquely, and parks it in uploads/.
+
+Then your app calls the Uber Driver (uploader).
+
+The driver picks it up from that local filePath inside uploads/, runs it down the highway, and drops it off at Cloudinary.
+
+You just configured a bulletproof file-upload pipeline. Fix that little cb typo, make sure your folder is named uploads, and you are ready to rock! How does it feel seeing the security gate step connect to the rider step? */
+
+/* so i should create a folder called uploads so when i save to cloudinary i can view it in the folder locally
+
+Yes, you absolutely must create that folder named uploads in your project's main directory, but there is one huge detail about how it works that you need to know so you don't get confused when testing it!
+
+Let's look at the exact life cycle of an image using your folder structure and our Uber app story, because it will show you exactly when the file is local and when it goes to the cloud.
+
+The Real Identity of the uploads/ Folder
+The uploads/ folder on your computer is not a permanent gallery—it is a temporary bus stop.
+
+Here is exactly what happens step-by-step when a user clicks "Submit" on your website:
+
+The Arrival at the Bus Stop (Local File Creation):
+Multer catches the incoming image from the internet, runs the security checks we talked about, and writes the file into your local uploads/ folder. If you open your code editor at this exact millisecond, yes, you will physically see the file sitting inside your local uploads/ folder.
+
+The Uber Driver Picks It Up (Cloudinary Upload):
+Your backend code then wakes up the Uber Driver (Cloudinary.uploader.upload) and hands them the file path pointing to that exact file inside your local uploads/ folder. The driver takes the file and drives it up to the Cloudinary cloud warehouse.
+
+The Permanent Home (Cloudinary Storage):
+Once the file arrives at Cloudinary, Cloudinary saves it permanently on their massive internet servers and hands you back that beautiful receipt URL (result.secure_url).
+
+A Standard Professional Trick: Cleaning Up the Bus Stop
+Right now, if you leave your code as it is, every single image your users upload will stay inside your local uploads/ folder forever and go to Cloudinary.
+
+While this means you can view them locally, think about what happens when your platform grows: if 10,000 users upload 5MB images, your local server will completely run out of hard drive space and crash! Big tech companies don't keep files in two places at once.
+
+To prevent this, professional engineers do a "clean up" step. Once the Uber driver successfully drops the file off at Cloudinary, they use a built-in Node.js tool called fs.unlinkSync() to delete the temporary file from the local uploads/ folder.
+
+It looks like this in action:
+
+JavaScript
+const fs = require('fs'); // Node's built-in File System tool
+
+const uploadToCloudinary = async (filePath) => {
+    try {
+        // 1. The driver takes the file from your local uploads/ folder to the cloud
+        const result = await Cloudinary.uploader.upload(filePath);
+        
+        // 2. SUCCESS! The file is safe in the cloud. Delete the local temporary file!
+        fs.unlinkSync(filePath); 
+        
+        return {
+            url: result.secure_url,
+            publicId: result.public_id
+        }
+    } catch (error) {
+        // If the upload failed, we still want to remove the broken file from our local bus stop
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+        }
+        throw error;
+    }
+}
+Summary for your setup:
+Yes: Create a folder named exactly uploads right next to your server file. Without it, Multer will break immediately because it has nowhere to park the incoming files.
+
+Viewing the files: For now, while you are building and debugging, you can skip the fs.unlinkSync step so you can physically look inside your local folder and see your images appearing. It’s a great way to prove your code is working!
+
+The Future: When you get ready to launch the app globally or prepare it for a code review, add that fs.unlinkSync step to show top-tech companies that you understand how to manage server memory efficiently.
+
+Go ahead and create that folder! You are putting the physical building blocks of your system together perfectly.
+
+
+ */

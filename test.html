@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Backend Upload Test with Auth</title>
+    <style>
+        body {
+            background: #111;
+            color: #fff;
+            font-family: sans-serif;
+            padding: 40px;
+        }
+
+        form {
+            background: #222;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 500px;
+            margin-bottom: 20px;
+        }
+
+        div {
+            margin-bottom: 15px;
+        }
+
+        input,
+        textarea,
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 4px;
+            border: none;
+            box-sizing: border-box;
+        }
+
+        button {
+            background: #ff6600;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        #responseLog {
+            background: #000;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>Test Your Image Upload (With Auth Token)</h2>
+
+    <form id="uploadForm">
+        <div>
+            <label style="color: #ff6600; font-weight: bold;">1. Paste Your Auth Token Here:</label>
+            <textarea id="tokenInput" rows="3" placeholder="Paste your long JWT token string here..."
+                required></textarea>
+        </div>
+
+        <div>
+            <label style="font-weight: bold;">2. Select Food Image:</label>
+            <input type="file" id="imageFile" required>
+        </div>
+
+        <button type="submit">Upload Directly to Backend</button>
+    </form>
+
+    <h3>Server Response:</h3>
+    <div id="responseLog"></div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const responseLog = document.getElementById('responseLog');
+            responseLog.style.display = "block";
+            responseLog.innerText = "Sending request...";
+
+            const token = document.getElementById('tokenInput').value.trim();
+            const fileInput = document.getElementById('imageFile');
+
+            // Package the file exactly like Multer expects
+            const formData = new FormData();
+            formData.append('image', fileInput.files[0]);
+
+            try {
+                // Adjust port 5000 if your backend runs on a different port
+                const response = await fetch('http://localhost:5000/api/image/upload', {
+                    method: 'POST',
+                    headers: {
+                        // Triggers your authMiddleware successfully
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+                responseLog.innerText = JSON.stringify(data, null, 2);
+            } catch (error) {
+                responseLog.innerText = "Error connecting to server: " + error.message;
+            }
+        });
+    </script>
+
+</body>
+
+</html>
