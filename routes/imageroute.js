@@ -1,7 +1,7 @@
 const express = require('express');
-const adminMiddleWare = require('../middleWare/adminMD');
-const authMW = require('../middleWare/MW');
-const uploadMiddleWare = require('../middleWare/uploadMW');
+const adminMiddleWare = require('../Middleware/adminMD');
+const authMW = require('../Middleware/MW');
+const uploadMiddleWare = require('../Middleware/uploadMW');
 
 const { 
     uploadImagecontroller, 
