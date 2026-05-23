@@ -1,9 +1,9 @@
 require('dotenv').config()
 const cors = require('cors');
 const express = require('express');
-const router = require('./Routes/rt');
-const uploadImageRoute = require('./Routes/imageroute');
-const appointmentRoute = require('./Routes/Appointmentroute'); // FIX: missing import
+const router = require('./routes/rt');
+const uploadImageRoute = require('./routes/imageroute');
+const appointmentRoute = require('./routes/Appointmentroute'); // FIX: missing import
 const connectDB = require('./Database/DB');
 
 const app = express();
