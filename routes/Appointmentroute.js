@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const authMW = require('../middleWare/MW');
-const adminMiddleWare = require('../middleWare/adminMD');
+const authMW = require('../Middleware/MW')
+const adminMiddleWare = require('../Middleware/adminMD')
 
 const {
     createAppointment,
