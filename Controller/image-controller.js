@@ -1,7 +1,7 @@
 const Image = require('../Models/image');
 const uploadToCloudinary = require('../ClodinaryHelper/helper');
 const fs = require('fs');
-const cloudinary = require('../Config/Clodinary');
+const cloudinary = require('../config/Clodinary');
 
 const uploadImagecontroller = async (req, res) => {
     if (!req.file) {
