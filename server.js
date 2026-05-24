@@ -11,11 +11,7 @@ const PORT = process.env.PORT || 3000;
 
 connectDB();
 
-app.use(cors({
-    origin: ['http://localhost:5173', 'https://react-luxlab.vercel.app'],
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-    credentials: true
-}));
+app.use(cors());
 
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
