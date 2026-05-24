@@ -7,19 +7,14 @@ const uploadImagecontroller = async (req, res) => {
     if (!req.file) {
         return res.status(400).json({
             error: "Multer did not receive a file.",
-            whatToCheck: {
-                incomingBodyKeys: Object.keys(req.body || {}),
-                contentTypeHeader: req.headers['content-type'],
-                wasFileSent: "No"
-            }
         });
     }
 
     try {
-        const cloudinaryResponse = await uploadToCloudinary(req.file.path);
+        const cloudinaryResponse = await uploadToCloudinary(req.file.buffer, req.file.mimetype);
         
-        const url = cloudinaryResponse.secure_url || cloudinaryResponse.url;
-        const publicId = cloudinaryResponse.public_id || cloudinaryResponse.publicId;
+        const url = cloudinaryResponse.url;
+        const publicId = cloudinaryResponse.publicId;
 
         if (!url || !publicId) {
             throw new Error("Cloudinary did not return a valid URL or Public ID.");
@@ -39,10 +34,6 @@ const uploadImagecontroller = async (req, res) => {
         });
 
         await newUploadedImage.save();
-
-        if (fs.existsSync(req.file.path)) {
-            fs.unlinkSync(req.file.path);
-        }
 
         return res.status(200).json({
             success: true,

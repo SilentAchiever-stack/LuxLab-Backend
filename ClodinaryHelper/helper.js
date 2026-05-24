@@ -1,38 +1,30 @@
-/* const Cloudinary = require('../config/Clodinary')
+//check EMMAj for better, we changed this due to render
+const cloudinary = require('../config/Clodinary');
 
-const uploadToCloudinary = async(LocalImageUrl)=>{
-    try
-    { const result = Cloudinary.uploader.upload(LocalImageUrl);
-       return{
-       url: result.secure_url,
-        publicId: result.public_id
-    }}catch(err){
-        console.log('Error while uploading to cloudinary',error)
-        throw new Error('Error while uploading to cloudinary')
-    }
-}
-module.exports = uploadToCloudinary; */
-const cloudinary = require('../config/Clodinary'); // Use lowercase 'cloudinary' conventionally
+const uploadToCloudinary = async (fileBuffer, mimetype) => {
+    try {
+        const result = await new Promise((resolve, reject) => {
+            const uploadStream = cloudinary.uploader.upload_stream(
+                { resource_type: 'image' },
+                (error, result) => {
+                    if (error) reject(error);
+                    else resolve(result);
+                }
+            );
+            uploadStream.end(fileBuffer);
+        });
 
-const uploadToCloudinary = async (LocalImageUrl) => {
-    try { 
-        // 1. ADDED AWAIT: Now it will actually wait for the image to upload!
-        const result = await cloudinary.uploader.upload(LocalImageUrl);
-        
         return {
             url: result.secure_url,
             publicId: result.public_id
         };
-        
-    } catch (error) { // 2. CHANGED 'err' to 'error' to match below
+
+    } catch (error) {
         console.error('Error while uploading to cloudinary:', error);
-        
-        // 3. Pass the REAL error message up so we can see it in Postman
         throw new Error(error.message || 'Error while uploading to cloudinary');
     }
 };
 
-// Don't forget to export it!
 module.exports = uploadToCloudinary;
 
 

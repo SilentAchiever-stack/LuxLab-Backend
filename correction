@@ -1,3 +1,42 @@
+/* fiormer uploadmidlleware*
+const multer = require('multer');
+const path = require('path');
+
+
+//set our multer storage
+//diskStorage gives you full control on storing files to disks 
+const Storage = multer.diskStorage({
+    //cd which path you want to uploads
+destination : function(req,file,cb){
+    cb(null,"uploads/")
+},
+filename : function(req,file,cb){
+    cb(null,
+        file.fieldname + "-" + Date.now() + path.extname(file.originalname)// these will create the unique file name and will be stored inside the (uploads) folders
+    )
+}
+});
+
+//file filter function
+ const checkFileFilter = (req,file,cb)=>{
+    if(file.mimetype.startsWith('image')){
+    cb(null,true)
+    } else{
+        cb(new Error('Not an image! please upload only images'))
+    }
+ }
+
+ //multer middleware
+ module.exports = multer({
+    storage : Storage,
+    fileFilter : checkFileFilter,
+    limits : {
+        fileSize: 5 *1024  *1024 //5MB file size
+    }
+ })/
+
+
+
 const mongoose = require('mongoose'); // Stick to lowercase 'mongoose'
 
 const connectDB = async () => {
