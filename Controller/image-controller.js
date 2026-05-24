@@ -51,7 +51,7 @@ const uploadImagecontroller = async (req, res) => {
     }
 };
 
-const fetchImageController = async (req, res) => {
+/* const fetchImageController = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 100; 
@@ -84,8 +84,26 @@ const fetchImageController = async (req, res) => {
             message: 'something went wrong'
         });
     }
-};
+}; */
+// imageController.js — fetchImageController
+const fetchImageController = async (req, res) => {
+    try {
+        const userRole = req.user?.role;
+        
+        // Admins see all images; regular users only see approved admin images
+        const filter = userRole === 'admin' 
+            ? {} 
+            : { status: 'approved', uploadedByRole: 'admin' };
 
+        const images = await Image.find(filter)
+            .populate('uploadedBy', 'username email')
+            .sort({ createdAt: -1 });
+
+        res.status(200).json({ success: true, data: images });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Something went wrong' });
+    }
+};
 const approveImageController = async (req, res) => {
     try {
         const image = await Image.findById(req.params.id);

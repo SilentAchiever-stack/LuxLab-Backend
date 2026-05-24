@@ -49,7 +49,7 @@ const createUsersDetails = async (req, res) => {
 
         const refreshToken = JWT.sign(
             payload,
-            process.env.JWT_SECRET,
+            process.env.JWT_SECRET_KEY,
             { expiresIn: '7d' }
         );
 

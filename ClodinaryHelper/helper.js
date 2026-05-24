@@ -1,4 +1,16 @@
 //check EMMAj for better, we changed this due to render
+/* So first of all should we say the reason why it was not uploading was because we were kind of using a local a local file instead of like I mean we were saving our cloud generator local file and since we are no longer in the local five parts we need to like do it online and
+
+5:41 PM
+Exactly right.
+
+Before, Multer was saving the file to your local uploads/ folder first, then Cloudinary would read it from that path. That works perfectly on your computer because the folder exists.
+
+But on Render (and any cloud server), the filesystem is temporary — there's no permanent uploads/ folder. So Cloudinary couldn't find the file.
+
+The fix we made uses memory storage — Multer now holds the file in RAM as a buffer, and we pass that buffer directly to Cloudinary without ever touching the disk. No local folder needed.
+
+This is actually the correct way to do it in production. Your local setup was working by accident. */
 const cloudinary = require('../config/Clodinary');
 
 const uploadToCloudinary = async (fileBuffer, mimetype) => {
